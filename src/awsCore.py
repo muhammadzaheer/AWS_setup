@@ -27,7 +27,7 @@ class awsCore (object):
             self.public_subnet = self.__create_public_subnet(); 
             self.ig = self.__create_attach_internet_gateway();
             self.main_rtable = self.__get_main_rtable();
-            self.custom_rtable, self.custom_rtable_assoc = 
+            self.custom_rtable, self.custom_rtable_assoc = \
                                                 self.__create_custom_rtable();
             # TODO: Delete All trafic rules from both security groups
             self.sg_nat = self.__create_sg_nat();
@@ -108,7 +108,7 @@ class awsCore (object):
         
         sg_private = self.ec2_conn.create_security_group (
                                 name = self.conf["name"]+ "_Private", 
-                                description= ("SG for private instances",
+                                description= "SG for private instances",
                                 vpc_id = self.vpc.id);
         sg_private.add_tag("Name", self.conf["name"] +"_Private");
         self.__add_sgprivate_rules(sg_private);
