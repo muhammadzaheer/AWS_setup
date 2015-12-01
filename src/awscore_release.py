@@ -28,7 +28,7 @@ class awsCoreRelease (object):
     def __create_ec2_conn (self):
 
         singapore = boto.ec2.regions()[4];
-        return boto.ec2.connect_to_region (region_name = singapore.name);
+        return boto.ec2.connect_to_region (region_name=singapore.name);
 
     def __create_vpc_conn (self):
 
