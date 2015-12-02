@@ -16,10 +16,11 @@ class awsParticipant (object):
     def __init__ (self, conf_file, cidr_block):
 
         self.conf = self.__load_conf (conf_file);
-        self.cidr_block = cidr_block;
+        self.cidr_block = self.conf["cidr"];
         self.ec2_conn = awsConn.create_ec2_conn_singapore ();
         self.vpc_conn = awsConn.create_vpc_conn_singapore ();
         self.private_subnet = self.__create_private_subnet ();
+        self.participant_id = self.conf["cidr"].split(".")[2];
         self.cloud_instances = self.__run_cloud_instances ();
         self.conf_participant = self.__populate_conf_participant();
         self.__persist_conf_participant();   
@@ -49,8 +50,8 @@ class awsParticipant (object):
         cloud_instances = [];
         controller = self.__run_cloud_instance(self.__create_private_ip('91'));
         compute = self.__run_cloud_instance(self.__create_private_ip('92'));
-        controller.add_tag("Name", "Controller");
-        compute.add_tag("Name", "Compute");
+        controller.add_tag("Name", "Controller_" + self.participant_id );
+        compute.add_tag("Name", "Compute_" + self.participant_id);
         cloud_instances.append(controller);
         cloud_instances.append(compute);
         ids = [];
@@ -112,7 +113,8 @@ class awsParticipant (object):
         if not os.path.exists(configs):
             os.makedirs(configs);   
         
-        with open('configs/conf_participant.json', 'w') as fp:
+        with open('configs/conf_participant_' + self.participant_id +'.json', 
+                  'w') as fp:
             json.dump (self.conf_participant, fp);
 
             

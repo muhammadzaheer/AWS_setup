@@ -1,6 +1,7 @@
 import sys;
 import time;
 import json;
+import os;
 
 import boto.ec2;
 import boto.vpc;
@@ -162,76 +163,22 @@ class awsCore (object):
                                    instance_id = self.nat_instance.id);
         
     def __add_sgnat_rules (self, sg_nat):
-    
         # inbound traffic rules
-        # HTTP from private subnet
+        # Allowing all inbound traffic to NAT instances
         self.ec2_conn.authorize_security_group(
-                            group_id = sg_nat.id, ip_protocol = "tcp",
-                            from_port = 80, to_port = 80, 
-                            cidr_ip = "172.16.1.0/24");
-        # HTTPS from private subnet
-        self.ec2_conn.authorize_security_group(
-                            group_id = sg_nat.id, ip_protocol = "tcp",
-                            from_port = 443, to_port = 443, 
-                            cidr_ip = "172.16.1.0/24");
-        # SSH from anywhere
-        self.ec2_conn.authorize_security_group(
-                            group_id = sg_nat.id, ip_protocol = "tcp",
-                            from_port = 22, to_port = 22, 
-                            cidr_ip = "0.0.0.0/0");
-        # ICMP from anywhere
-        self.ec2_conn.authorize_security_group(
-                            group_id = sg_nat.id, ip_protocol = "icmp",
-                            from_port = -1, to_port = -1, 
+                            group_id = sg_nat.id, ip_protocol = "-1",
+                            from_port = None, to_port = None, 
                             cidr_ip = "0.0.0.0/0");
     
-        # outbound traffic rules
-        # HTTP to anywhere
-        self.ec2_conn.authorize_security_group_egress (
-                        group_id = sg_nat.id, ip_protocol = "tcp",
-                        from_port = 80, to_port = 80, 
-                        cidr_ip = "0.0.0.0/0");
-        # HTTPS to anywhere
-        self.ec2_conn.authorize_security_group_egress (
-                        group_id = sg_nat.id, ip_protocol = "tcp",
-                        from_port = 443, to_port = 443, 
-                        cidr_ip = "0.0.0.0/0");
-        # SSH to private subnet
-        self.ec2_conn.authorize_security_group_egress (
-                        group_id = sg_nat.id, ip_protocol = "tcp",
-                        from_port = 22, to_port = 22, 
-                        cidr_ip = "172.16.1.0/24");
-        # ICMP to anywhere
-        self.ec2_conn.authorize_security_group_egress (
-                        group_id = sg_nat.id, ip_protocol = "icmp",
-                        from_port = -1, to_port = -1, 
-                        cidr_ip = "0.0.0.0/0");
-        
     def __add_sgprivate_rules(self,sg_private):
-            
+           
         # inbound traffic rules
-        # SSH from public subnet
+        # Allow SSH from public subnet
         self.ec2_conn.authorize_security_group(
                             group_id = sg_private.id, ip_protocol = "tcp",
                             from_port = 22, to_port = 22, 
                             cidr_ip = "172.16.0.0/24");
-        # outbound traffic rules
-        # ICMP to anywhere
-        self.ec2_conn.authorize_security_group_egress (
-                            group_id = sg_private.id, 
-			    ip_protocol = "icmp", from_port = -1, 
-			    to_port = -1, cidr_ip = "0.0.0.0/0");
-        # HTTP to anywhere
-        self.ec2_conn.authorize_security_group_egress (
-                            group_id = sg_private.id, 
-			    ip_protocol = "tcp",from_port = 80, 
-			    to_port = 80, cidr_ip = "0.0.0.0/0");
-        # HTTPS to anywhere
-        self.ec2_conn.authorize_security_group_egress (
-                            group_id = sg_private.id, 
-			    ip_protocol = "tcp",from_port = 443, 
-			    to_port = 443, cidr_ip = "0.0.0.0/0"); 
-        
+    
     def __populate_conf(self):
             
         self.conf["vpc"] = self.vpc.id;
@@ -249,8 +196,16 @@ class awsCore (object):
     
     def __persist_conf(self):
         
-        with open ('configs/conf.json','w') as fp:
+        configs = os.path.join (os.getcwd(), 'configs');
+        if not os.path.exists(configs):
+            os.makedirs(configs);
+        with open ('configs/conf_core.json','w') as fp:
             json.dump(self.conf,fp);    
+        
+        for i in range (1,26):
+            self.conf["cidr"] = "172.16." + str(i) + ".0/24";
+            with open ('configs/conf_' + str(i), 'w') as fp:
+                json.dump(self.conf,fp);
 
 if __name__ == '__main__':
     
