@@ -5,6 +5,7 @@ import json;
 import boto.ec2;
 import boto.vpc;
 
+from awsutils import awsUtils;
 
 class awsCore (object):
     
@@ -52,7 +53,7 @@ class awsCore (object):
     
     def __create_vpc (self):
         
-        vpc = self.vpc_conn.create_vpc (cidr_block = "10.0.0.0/16");
+        vpc = self.vpc_conn.create_vpc (cidr_block = "172.16.0.0/16");
         vpc.add_tag("Name", self.conf["name"] + "_VPC");
         return vpc;
     
@@ -60,7 +61,7 @@ class awsCore (object):
         
         public_subnet = self.vpc_conn.create_subnet (
                                     self.vpc.id, 
-                                    cidr_block = "10.0.0.0/24");
+                                    cidr_block = "172.16.0.0/24");
         public_subnet.add_tag("Name", self.conf["name"] + "_public_subnet");
         return public_subnet;
     
@@ -121,7 +122,7 @@ class awsCore (object):
 			max_count = 1, key_name ='openstack-workshop',
                         instance_type = 't2.micro',
                         subnet_id = self.public_subnet.id,
-                        private_ip_address='10.0.0.5',
+                        private_ip_address='172.16.0.5',
                     	security_group_ids = [self.sg_nat.id]);
         nat_instance = reservation.instances[0];
         nat_instance.add_tag("Name", self.conf["name"] + "_NAT");
@@ -138,16 +139,10 @@ class awsCore (object):
                                             value=False);
         # Wait for the NAT instance to get into running state 
         # We cannot assing an EIP to it until it is in the running
-        while True: 
-            reservations = self.ec2_conn.get_all_instances(
-                                        instance_ids = [nat_instance.id]);
-            if reservations[0].instances[0].state != 'running':
-                print "instance {} starting...".format(
-                                            reservations[0].instances[0].id);
-                time.sleep(10);
-            else:
-                return nat_instance; 
-    
+        awsUtils.wait_for_instances([nat_instance.id], 'running', 
+                                    self.ec2_conn);
+        return nat_instance;
+
     def __allocate_eip_nat (self):
             
         # Allocating an elastic IP address for our NAT instance
@@ -173,12 +168,12 @@ class awsCore (object):
         self.ec2_conn.authorize_security_group(
                             group_id = sg_nat.id, ip_protocol = "tcp",
                             from_port = 80, to_port = 80, 
-                            cidr_ip = "10.0.1.0/24");
+                            cidr_ip = "172.16.1.0/24");
         # HTTPS from private subnet
         self.ec2_conn.authorize_security_group(
                             group_id = sg_nat.id, ip_protocol = "tcp",
                             from_port = 443, to_port = 443, 
-                            cidr_ip = "10.0.1.0/24");
+                            cidr_ip = "172.16.1.0/24");
         # SSH from anywhere
         self.ec2_conn.authorize_security_group(
                             group_id = sg_nat.id, ip_protocol = "tcp",
@@ -205,7 +200,7 @@ class awsCore (object):
         self.ec2_conn.authorize_security_group_egress (
                         group_id = sg_nat.id, ip_protocol = "tcp",
                         from_port = 22, to_port = 22, 
-                        cidr_ip = "10.0.1.0/24");
+                        cidr_ip = "172.16.1.0/24");
         # ICMP to anywhere
         self.ec2_conn.authorize_security_group_egress (
                         group_id = sg_nat.id, ip_protocol = "icmp",
@@ -219,7 +214,7 @@ class awsCore (object):
         self.ec2_conn.authorize_security_group(
                             group_id = sg_private.id, ip_protocol = "tcp",
                             from_port = 22, to_port = 22, 
-                            cidr_ip = "10.0.0.0/24");
+                            cidr_ip = "172.16.0.0/24");
         # outbound traffic rules
         # ICMP to anywhere
         self.ec2_conn.authorize_security_group_egress (
@@ -254,7 +249,7 @@ class awsCore (object):
     
     def __persist_conf(self):
         
-        with open ('conf.json','w') as fp:
+        with open ('configs/conf.json','w') as fp:
             json.dump(self.conf,fp);    
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@ import json;
 import boto.ec2;
 import boto.vpc;
 
+from awsconn import awsConn;
 
 class awsCoreRelease (object):
     
@@ -14,8 +15,8 @@ class awsCoreRelease (object):
         try:
             with open (conf_file, 'r') as fp:
                 self.conf = json.load(fp);
-            self.ec2_conn = self.__create_ec2_conn();
-            self.vpc_conn = self.__create_vpc_conn();        
+            self.ec2_conn = awsConn.create_ec2_conn_singapore();
+            self.vpc_conn = awsConn.create_vpc_conn_singapore();
             self.__release();
         except IOError:
             print 'IOError: Conf file not found';
@@ -25,20 +26,10 @@ class awsCoreRelease (object):
             print "Make sure Conf file is valid and contains all resource ids";
             sys.exit(-1);
 
-    def __create_ec2_conn (self):
-
-        singapore = boto.ec2.regions()[4];
-        return boto.ec2.connect_to_region (region_name=singapore.name);
-
-    def __create_vpc_conn (self):
-
-        singapore = boto.ec2.regions()[4];
-        return boto.vpc.VPCConnection (region = singapore);
-
     def __release (self):
 
         self.ec2_conn.delete_security_group (
-                                group_id = self.conf["sg_private"]);
+                                    group_id = self.conf["sg_private"]);
         self.ec2_conn.disassociate_address (
                                 association_id = self.conf["eip_assoc"]);
         self.ec2_conn.release_address (
