@@ -11,7 +11,7 @@ from awsutils import awsUtils;
 class awsCore (object):
     
 
-    def __init__ (self, name):
+    def __init__ (self, name, expected_participants):
 
             """
             Dictionary 'conf' holds IDs for VPC resources
@@ -21,7 +21,7 @@ class awsCore (object):
             """
             
             self.conf = {"name" : name}; 
-            
+            self.expected_participants = expected_participants; 
             self.ec2_conn = self.__create_ec2_conn(); 
             self.vpc_conn = self.__create_vpc_conn(); 
             
@@ -190,7 +190,7 @@ class awsCore (object):
         self.conf["sg_nat"] = self.sg_nat.id;
         self.conf["sg_private"] = self.sg_private.id;
         self.conf["nat_instance"] = self.nat_instance.id;
-        self.conf["eip"] = self.eip.public_ip;
+        self.conf["eip_address"] = self.eip.public_ip;
         self.conf["eip_alloc"] = self.eip.allocation_id;
         self.conf["eip_assoc"] = self.eip.association_id;
     
@@ -202,15 +202,17 @@ class awsCore (object):
         with open ('configs/conf_core.json','w') as fp:
             json.dump(self.conf,fp);    
         
-        for i in range (1,26):
+        for i in range (1,self.expected_participants):
             self.conf["cidr"] = "172.16." + str(i) + ".0/24";
+            self.conf["port_1"] = str(i);
+            self.conf["port_2"] = str(self.expected_participants+i);
             with open ('configs/conf_' + str(i), 'w') as fp:
                 json.dump(self.conf,fp);
 
 if __name__ == '__main__':
     
-    if len (sys.argv) != 2:
-        print 'Usage: awsCore.py <name_tag>';
+    if len (sys.argv) != 3:
+        print 'Usage: awsCore.py <name_tag> <expected_participants>';
         sys.exit(-1);
     
-    aws = awsCore (sys.argv[1]);
+    aws = awsCore (sys.argv[1], int(sys.argv[2]));
