@@ -80,7 +80,7 @@ class awsParticipant (object):
         reservation = self.ec2_conn.run_instances (
                             image_id = image_id, min_count = 1,
                             max_count = 1, key_name = 'openstack-workshop',
-                            instance_type ='m3.xlarge', 
+                            instance_type ='m4.xlarge', 
                             subnet_id = self.private_subnet.id, 
                             private_ip_address=private_ip,
                             security_group_ids=[self.conf["sg_private"]]);
