@@ -125,7 +125,7 @@ class awsParticipant (object):
 if __name__ == '__main__':
     
     if len (sys.argv) != 3:
-        print 'usage: awsParticipant.py <conf_file> <cidr_block>'
+        print 'usage: python awsParticipant.py <conf_file> <cidr_block>'
         sys.exit(-1);
     conf_file = sys.argv[1];
     cidr_block = sys.argv[2];

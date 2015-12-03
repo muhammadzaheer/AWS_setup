@@ -44,7 +44,7 @@ class awsParticipantRelease (object):
 if __name__ == '__main__':
     
     if len(sys.argv) != 2:
-        print 'usage: awsParticipantRelease.py <conf_file>';
+        print 'usage: python awsParticipantRelease.py <conf_file>';
         sys.exit(-1);
 
     apr = awsParticipantRelease (sys.argv[1]);

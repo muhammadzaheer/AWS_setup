@@ -66,7 +66,8 @@ class awsCoreRelease (object):
 if __name__ == '__main__':
 
     if len (sys.argv) != 2:
-        print 'usage: awsCoreRelease.py <conf_file>';    
+        print 'usage: python awsCoreRelease.py <conf_file>';    
+            
         sys.exit(-1);
     
     acr = awsCoreRelease(sys.argv[1]);

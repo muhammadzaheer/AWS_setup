@@ -202,17 +202,19 @@ class awsCore (object):
         with open ('configs/conf_core.json','w') as fp:
             json.dump(self.conf,fp);    
         
+        # Port offset
+        p_offset = 30000; 
         for i in range (1,self.expected_participants):
             self.conf["cidr"] = "172.16." + str(i) + ".0/24";
-            self.conf["port_1"] = str(i);
-            self.conf["port_2"] = str(self.expected_participants+i);
+            self.conf["port_1"] = str(i + p_offset);
+            self.conf["port_2"] = str(self.expected_participants+i + p_offset);
             with open ('configs/conf_' + str(i), 'w') as fp:
                 json.dump(self.conf,fp);
 
 if __name__ == '__main__':
     
     if len (sys.argv) != 3:
-        print 'Usage: awsCore.py <name_tag> <expected_participants>';
+        print 'usage: python awsCore.py <name_tag> <expected_participants>';
         sys.exit(-1);
     
     aws = awsCore (sys.argv[1], int(sys.argv[2]));
