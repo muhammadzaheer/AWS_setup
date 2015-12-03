@@ -48,8 +48,12 @@ class awsParticipant (object):
     def __run_cloud_instances (self, private_ip = None):
         
         cloud_instances = [];
-        controller = self.__run_cloud_instance(self.__create_private_ip('91'));
-        compute = self.__run_cloud_instance(self.__create_private_ip('92'));
+        controller = self.__run_cloud_instance(
+                                self.__create_private_ip('91'),
+                                image_id='ami-ea00c089');
+        compute = self.__run_cloud_instance(
+                                self.__create_private_ip('92'),
+                                image_id='ami-7001c113');
         controller.add_tag("Name", "Controller_" + self.participant_id );
         compute.add_tag("Name", "Compute_" + self.participant_id);
         cloud_instances.append(controller);
@@ -74,7 +78,7 @@ class awsParticipant (object):
                               image_id = 'ami-96f1c1c4'):
     
         reservation = self.ec2_conn.run_instances (
-                            image_id = 'ami-96f1c1c4', min_count = 1,
+                            image_id = image_id, min_count = 1,
                             max_count = 1, key_name = 'openstack-workshop',
                             instance_type ='m4.xlarge', 
                             subnet_id = self.private_subnet.id, 
