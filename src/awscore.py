@@ -121,7 +121,7 @@ class awsCore (object):
         reservation = self.ec2_conn.run_instances (
                         image_id = 'ami-1a9dac48', min_count = 1, 
 			max_count = 1, key_name ='openstack-workshop',
-                        instance_type = 't2.micro',
+                        instance_type = 'm3.xlarge',
                         subnet_id = self.public_subnet.id,
                         private_ip_address='172.16.0.5',
                     	security_group_ids = [self.sg_nat.id]);
