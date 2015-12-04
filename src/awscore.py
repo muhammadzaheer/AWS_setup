@@ -174,11 +174,12 @@ class awsCore (object):
            
         # inbound traffic rules
         # Allow SSH from public subnet
+        # Allowing all inbound traffic to Private instances
         self.ec2_conn.authorize_security_group(
-                            group_id = sg_private.id, ip_protocol = "tcp",
-                            from_port = 22, to_port = 22, 
-                            cidr_ip = "172.16.0.0/24");
-    
+                            group_id = sg_private.id, ip_protocol = "-1",
+                            from_port = None, to_port = None,
+                            cidr_ip = "0.0.0.0/0");
+
     def __populate_conf(self):
             
         self.conf["vpc"] = self.vpc.id;
