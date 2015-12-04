@@ -21,10 +21,16 @@ class awsParticipant (object):
         self.vpc_conn = awsConn.create_vpc_conn_singapore ();
         self.private_subnet = self.__create_private_subnet ();
         self.participant_id = self.conf["cidr"].split(".")[2];
-        self.cloud_instances = self.__run_cloud_instances ();
+        self.controller_ip, self.compute_ip, self.cloud_instances = \
+                                                self.__run_cloud_instances ();
         self.conf_participant = self.__populate_conf_participant();
         self.__persist_conf_participant();   
-             
+        
+        print 'AWS machines successfully setup'
+        print 'Jump Host IP: ', self.conf["eip_address"];
+        print 'Controller IP: ', self.controller_ip;
+        print 'Compute IP: ', self.compute_ip;
+              
     def __populate_conf_participant (self):
         
         # Creating a tuple of cloud instance ids
@@ -48,11 +54,13 @@ class awsParticipant (object):
     def __run_cloud_instances (self, private_ip = None):
         
         cloud_instances = [];
+        controller_ip = self.__create_private_ip('91');
+        compute_ip = self.__create_private_ip('92');
         controller = self.__run_cloud_instance(
-                                self.__create_private_ip('91'),
+                                controller_ip,
                                 image_id='ami-ea00c089');
         compute = self.__run_cloud_instance(
-                                self.__create_private_ip('92'),
+                                compute_ip,
                                 image_id='ami-7001c113');
         controller.add_tag("Name", "Controller_" + self.participant_id );
         compute.add_tag("Name", "Compute_" + self.participant_id);
@@ -62,7 +70,7 @@ class awsParticipant (object):
         for instance in cloud_instances:
             ids.append(instance.id);
         awsUtils.wait_for_instances(ids, 'running');
-        return cloud_instances;
+        return controller_ip, compute_ip, cloud_instances;
     
     def __create_private_ip (self, last_quad):
     
