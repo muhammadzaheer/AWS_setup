@@ -120,12 +120,8 @@ class awsParticipant (object):
         return conf_participant;
 
     def __persist_conf_participant (self):
-        
-        configs = os.path.join(os.getcwd(), 'configs');
-        if not os.path.exists(configs):
-            os.makedirs(configs);   
-        
-        with open('configs/conf_participant_' + self.participant_id +'.json', 
+
+        with open('conf_participant_' + self.participant_id +'.json', 
                   'w') as fp:
             json.dump (self.conf_participant, fp);
 
