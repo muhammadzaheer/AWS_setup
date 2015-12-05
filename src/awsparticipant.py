@@ -58,10 +58,10 @@ class awsParticipant (object):
         compute_ip = self.__create_private_ip('92');
         controller = self.__run_cloud_instance(
                                 controller_ip,
-                                image_id='ami-ea00c089');
+                                image_id='ami-b734f4d4');
         compute = self.__run_cloud_instance(
                                 compute_ip,
-                                image_id='ami-7001c113');
+                                image_id='ami-2035f543');
         controller.add_tag("Name", "Controller_" + self.participant_id );
         compute.add_tag("Name", "Compute_" + self.participant_id);
         cloud_instances.append(controller);
