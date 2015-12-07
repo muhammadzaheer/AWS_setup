@@ -204,7 +204,7 @@ class awsCore (object):
             json.dump(self.conf,fp);    
         
         # Port offset
-        p_offset = 30000; 
+        p_offset = 3000; 
         for i in range (1,self.expected_participants+1):
             self.conf["cidr"] = "172.16." + str(i) + ".0/24";
             self.conf["port_1"] = str(i + p_offset);
