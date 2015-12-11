@@ -16,8 +16,9 @@ class awsUtils (object):
                                 instance_ids=instances);
             if all(instance.state == state
                     for instance in reservation[0].instances):
+                time.sleep(20);
                 return;
             else:
                 # TODO: Print more informative output
                 print 'Waiting for instances to be in ' + state + ' state';
-                time.sleep(20);
+                time.sleep(5);

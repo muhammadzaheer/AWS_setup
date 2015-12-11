@@ -33,6 +33,7 @@ class awsParticipantRelease (object):
     def __release (self):
         
         self.__terminate_cloud_instances();
+        
         self.vpc_conn.delete_subnet(self.private_subnet);
  
     def __terminate_cloud_instances (self):
@@ -40,7 +41,7 @@ class awsParticipantRelease (object):
         self.ec2_conn.terminate_instances (instance_ids=self.instance_ids);
         awsUtils.wait_for_instances(self.instance_ids, 'terminated', 
                                     self.ec2_conn);
-
+        
 if __name__ == '__main__':
     
     if len(sys.argv) != 2:
