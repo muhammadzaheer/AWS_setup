@@ -1,13 +1,18 @@
 import sys;
 import time;
 import json;
-
 import boto.ec2;
 import boto.vpc;
 
 from awsconn import awsConn;
 from awsutils import awsUtils;
 
+
+
+"""
+This is used to create release all the resources created by participant,
+The resources will be released in the exact opposite order of which they were created(So there will be no dependency error)
+"""
 
 class awsParticipantRelease (object):
 
@@ -17,8 +22,10 @@ class awsParticipantRelease (object):
         try:
             with open (conf_file, 'r') as fp:
                 self.conf = json.load(fp);
+            #Creates the connection to aws EC2 and VPC service    
             self.ec2_conn = awsConn.create_ec2_conn_singapore();
             self.vpc_conn = awsConn.create_vpc_conn_singapore();
+            #Extract instance and subnet IDS from the config file   
             self.instance_ids = self.conf['instance_ids'].split(',');
             self.private_subnet = self.conf['private_subnet'];
             self.__release();
@@ -32,8 +39,9 @@ class awsParticipantRelease (object):
     
     def __release (self):
         
+        #Terminate the EC2 instance
         self.__terminate_cloud_instances();
-        
+        #Deletes the Private Subnet
         self.vpc_conn.delete_subnet(self.private_subnet);
  
     def __terminate_cloud_instances (self):
